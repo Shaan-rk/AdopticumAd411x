@@ -14,6 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <Adafruit_SPIDevice.h>
 #include <Arduino.h>
 #include <SPI.h>
+#include "AD4116_Inputs.h"
 
 class AD411x
 {
@@ -73,7 +74,12 @@ class AD411x
 
 
 		bool begin();
+
+    // Generic read function for any register (1 to 4 bytes).
     bool read_register(byte reg, byte *data, byte data_len) const;
+    // Generic read function for 16-bit registers.
+    uint16_t read_register_16bit(byte reg) const;
+
     // Write a 16-bit word to a register.
     bool write_register(byte reg, uint16_t data) const;
     // Write a 8-bit word to a register.
@@ -94,6 +100,26 @@ class AD411x
 
     void reset();
     void read_volt(byte *out_channel, double *out_volt);
+
+    // Channel configuration.
+    void configure_channel(byte channel, AD4116::InputType input, byte setup, bool enable = true);
+    bool is_channel_enabled(byte channel);
+    void enable_channel(byte channel);
+    void disable_channel(byte channel);
+
+    // Configure setups 0 to 7
+    // Helper functions to create a setup value from boolean parameters.
+    uint16_t make_setup(bool bipolar, bool refbuf_p, bool refbuf_n,
+                    bool input_buffer, bool internal_vref, bool low_level_ref);
+
+    // Configure on of the 8 setups.
+    // To set the proper bits in the register, either use the make_setup function
+    // or combine the constants defined in AD4116::Setup.
+    void configure_setup(byte setup_number, uint16_t setup_bits);
+
+    // Read one of the 8 setups.
+    uint16_t read_setup(byte setup_number);
+
 
     bool is_data_ready() const;
 

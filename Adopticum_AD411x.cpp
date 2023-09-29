@@ -13,6 +13,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <SPI.h>
 #include "Adopticum_AD411x.h"
 #include "Adopticum_AD411x_Definitions.h"
+#include "AD4116_Setup.h"
 #include "Helpers.h"
 
 using namespace Helpers;
@@ -152,6 +153,23 @@ bool AD411x::read_register(byte reg, byte *data, byte data_len) const
     Serial.println(".");
   }
   return true;
+}
+
+uint16_t AD411x::read_register_16bit(byte reg) const
+{
+  // Write the registry address to the comms register. Then read the data back.
+  // bit 7 !WEN Must be 0.
+  // bit 6 R/W Set to 1 to read the register.
+  // bits 5..0 Registry address.
+  byte data[2];
+  byte addr = 0x40 | (0x3F & reg);
+  interrupt_skip = true;
+  spi_dev->write_then_read(&addr, 1, data, 2);
+  interrupt_skip = false;
+  // Pull and hold CS pin low to get interrupt on DOUT/DRDY when data is ready.
+  digitalWrite(this->cs_pin, LOW);
+  // Data as one 16 bit word, MSB first.
+  return ((uint16_t)data[0] << 8) | (uint16_t)data[1];
 }
 
 
@@ -462,3 +480,89 @@ void AD411x::on_interrupt()
 
 // ----------------------------------------------------------------------------
 #pragma endregion
+
+
+#pragma region Channel configuration
+// Region with channel configuration ------------------------------------------
+
+void AD411x::configure_channel(byte channel_number, AD4116::InputType input, byte setup, bool enable)
+{
+  if (channel_number > 15) { return; }
+  // CH_EN, bit 15.
+  uint16_t ch_en = enable ? 0x8000 : 0x0000;
+  // SETUP, bits 14..12.
+  uint16_t setup_sel = (setup & 0x7) << 12;
+  // INPUT, bits 9..0.
+  uint16_t ch_cfg = ch_en | setup_sel | (uint16_t)input;
+  ad4116.write_register(Registers::CH0 + channel_number, ch_cfg);
+}
+
+
+bool AD411x::is_channel_enabled(byte channel_number)
+{
+  if (channel_number > 15) { return false; }
+  auto ch_reg = read_register_16bit(Registers::CH0 + channel_number);
+  return (ch_reg & 0x8000) != 0;  // Check if bit 15 is set.
+}
+
+
+void AD411x::enable_channel(byte channel_number)
+{
+  if (channel_number > 15) { return; }
+  auto ch_reg = read_register_16bit(Registers::CH0 + channel_number);
+  ch_reg |= 0x8000;  // Set bit 15.
+  write_register(Registers::CH0 + channel_number, ch_reg);
+}
+
+void AD411x::disable_channel(byte channel_number)
+{
+  if (channel_number > 15) { return; }
+  auto ch_reg = read_register_16bit(Registers::CH0 + channel_number);
+  ch_reg &= 0x7FFF;  // Clear bit 15.
+  write_register(Registers::CH0 + channel_number, ch_reg);
+}
+
+// ----------------------------------------------------------------------------
+#pragma endregion
+
+#pragma region Setup configuration
+// Region with setup configuration --------------------------------------------
+
+uint16_t AD411x::make_setup(bool bipolar, bool refbuf_p, bool refbuf_n, 
+  bool input_buffer, bool internal_vref, bool low_level_ref)
+{
+  uint16_t setup = bipolar ? AD4116::Setup::BIPOLAR : AD4116::Setup::UNIPOLAR;
+  if (refbuf_p) { setup |= AD4116::Setup::REFBUF_P; }
+  if (refbuf_n) { setup |= AD4116::Setup::REFBUF_N; }
+  if (input_buffer) { setup |= AD4116::Setup::INPUT_BUFFERS; }
+  if (low_level_ref) { 
+    setup |= AD4116::Setup::AVDD_AVSS_REF; 
+  } else if (internal_vref) { 
+    setup |= AD4116::Setup::INTERNAL_REF;
+    //Note: Internal reference (2.5V). Must also be enabled in via ADCMODE.
+  }
+  return setup;
+}
+
+// Configure the setup register.
+// To set the proper bits in the register, either use the make_setup function
+// or combine the constants defined in AD4116::Setup.
+void AD411x::configure_setup(byte setup_number, uint16_t setup_bits) 
+{
+  if (setup_number > 7) { return; }
+  ad4116.write_register(Registers::SETUP0 + setup_number, setup_bits);
+}
+
+
+uint16_t AD411x::read_setup(byte setup_number)
+{
+  if (setup_number > 7) { return 0x0000; }
+  auto setup_bits = read_register_16bit(Registers::SETUP0 + setup_number);
+  return setup_bits;
+}
+
+//TODO: A method to parse fields out of setup register (setup_bits).
+
+// ----------------------------------------------------------------------------
+#pragma endregion
+
