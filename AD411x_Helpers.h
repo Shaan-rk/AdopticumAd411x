@@ -11,8 +11,11 @@ Distributed under the Boost Software License, Version 1.0.
 #pragma once
 #include <Arduino.h>
 
-namespace Helpers
+namespace AD411x
 {
-    byte set_bit(byte data, byte bit, bool value);
-    void print_bytes(byte *data, byte data_len);
-};
+    namespace Helpers
+    {
+        byte set_bit(byte data, byte bit, bool value);
+        void print_bytes(byte *data, byte data_len);
+    }
+}
