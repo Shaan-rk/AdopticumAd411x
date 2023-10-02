@@ -1,6 +1,6 @@
 /*
-AD4116_Inputs.h -
-Definitions of input channel selection bits for AD4116.
+AD4116_Setup.h
+Definitions for setup configuration register bits for AD4116.
 Part of Adopticum_AD411x Analog to digital converter Arduino library
 
 Created by Greger Burman, Adopticum, 2023.

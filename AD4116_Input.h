@@ -1,6 +1,6 @@
 /*
-AD4116_Inputs.h -
-Definitions of input channel selection bits for AD4116.
+AD4116_Input.h
+Definitions for input channel selection bits for AD4116.
 Part of Adopticum_AD411x Analog to digital converter Arduino library
 
 Created by Greger Burman, Adopticum, 2023.
@@ -16,7 +16,7 @@ namespace AD4116
 {
 	// These bits select which input pair is connected to the input of the ADC for a channel.
 	// These are bits [9..0] in the CHx registers, named INPUTx.
-	enum class InputType : uint16_t
+	enum class Input : uint16_t
 	{
 		VIN0_VIN1 = 0b0000000001,	 // VIN0 and VIN1.
 		VIN0_VINCOM = 0b0000010000,	 // VIN0 and VINCOM.

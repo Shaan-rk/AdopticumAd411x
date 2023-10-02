@@ -13,6 +13,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <SPI.h>
 #include "Adopticum_AD411x.h"
 #include "Adopticum_AD411x_Definitions.h"
+#include "AD4116_Input.h"
 #include "AD4116_Setup.h"
 #include "Helpers.h"
 

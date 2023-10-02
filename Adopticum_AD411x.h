@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <Adafruit_SPIDevice.h>
 #include <Arduino.h>
 #include <SPI.h>
-#include "AD4116_Inputs.h"
+#include "AD4116_Input.h"
 
 class AD411x
 {
@@ -178,6 +178,5 @@ class AD411x
 
 // Singleton instance declaration.
 extern AD411x &ad4116;
-
 
 #endif /* __Adopticum_AD411x_h */
