@@ -1,10 +1,9 @@
 #include <Adafruit_SPIDevice.h>
-#include "Adopticum_AD411x.h"
-#include "Adopticum_AD411x_Definitions.h"
+#include "AD4116.h"
 
 namespace config {
   const char *Program = "sample_one_channel";
-  const char *Version = "2023-09-26";
+  const char *Version = "2023-10-02";
 
 	// Only REQUIRE serial connection to computer in debugging scenario. 
 	const bool SerialDebug = false;
@@ -27,7 +26,7 @@ void hardcoded_ad4116_setup()
   uint16_t setup_no = 0 << 12;
   // Configure Channel 0
   uint16_t ch_cfg = CH_ENABLE | setup_no | VIN0_VIN1;
-  ad4116.write_register(Registers::CH0, ch_cfg);
+  ad4116.write_register(AD411x::Registers::CH0, ch_cfg);
 
   // Configure Setup 0. Default: 0x1000
   const uint16_t BIPOLAR = 0x1000;
@@ -36,19 +35,43 @@ void hardcoded_ad4116_setup()
   const uint16_t REFSEL = 0x0000; // 0x0=Ext ref, 0x2= Int ref (enable via ADCMODE), 0x3 = AVDD-AVSS
   // Keep default? (0x1000)
   uint16_t setup_cfg = BIPOLAR | REFBUF | INPUT_BUFFER | REFSEL;
-  ad4116.write_register(Registers::SETUP0, setup_cfg);
+  ad4116.write_register(AD411x::Registers::SETUP0, setup_cfg);
 
   // Configure filter. Default: 0x0500
   //TODO: Sinc3, Enhanced 50/60Hz rejection, post filters, order of digital filter, ...
-  uint16_t filter_cfg = 0x0500 | OutputDataRate::SPS_5194;
-  ad4116.write_register(Registers::FILTER0, filter_cfg);
+  uint16_t filter_cfg = (uint16_t)0x0500 | (uint16_t)AD4116::OutputDataRate::SPS_5194;
+  ad4116.write_register(AD411x::Registers::FILTER0, filter_cfg);
 
   // Configure ADC mode to continuous.
   uint16_t adc_mode = 0x0000;
-  ad4116.write_register(Registers::ADCMOD, adc_mode);
+  ad4116.write_register(AD411x::Registers::ADCMOD, adc_mode);
   
   // Set data_stat to get channel no with each sample.
   ad4116.set_data_stat(true);
+
+  // Use one pin for data ready interrupt.
+  ad4116.enable_interrupt(config::DRDY_PIN);
+}
+
+
+void setup_ad4116() 
+{
+  // Reset and configure AD411x.
+  ad4116.reset();
+
+  // Configure channel 0 to use setup 0 and measure voltage between VIN0 and VIN1.
+  ad4116.configure_channel(0, AD4116::Input::VIN0_VIN1, 0);
+
+  // Configure setup 0 to measure bipolar voltage with external reference voltage,
+  // enable input buffer, REF+ and REF- buffers.
+  uint16_t setup_cfg = AD411x::Setup::BIPOLAR | AD411x::Setup::EXTERNAL_REF
+    | AD411x::Setup::INPUT_BUFFERS | AD411x::Setup::REFBUF_P | AD411x::Setup::REFBUF_N;
+  ad4116.configure_setup(0, setup_cfg);
+  // Configure setup 0 to use default filtering (sinc5+sinc1 + 20 SPS 50/60Hz rejection)
+  ad4116.write_filter_register(0, AD411x::Filter::DEFAULT | (uint16_t)AD4116::OutputDataRate::SPS_10416);
+
+  // Configure ADC mode to continuous measurement.
+  ad4116.write_adc_mode((uint16_t)AD411x::ADCMode::Mode::CONTINUOUS);
 
   // Use one pin for data ready interrupt.
   ad4116.enable_interrupt(config::DRDY_PIN);
@@ -65,6 +88,13 @@ void setup()
 	pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
 
+  // Setup analog outputs as sample signals.
+  pinMode(A0, OUTPUT);
+  pinMode(A1, OUTPUT);
+  pinMode(A2, OUTPUT);
+  pinMode(A3, OUTPUT);
+  digitalWrite(A0, LOW);  // keep A0 as "GND" always.
+
   // Setup communication with AD411x.
   ad4116.setup(config::CS_PIN);
   if (!ad4116.begin() || !ad4116.check_id()) {
@@ -73,16 +103,9 @@ void setup()
   }
   Serial.println("AD411x initialized.");
 
-  // Configure AD411x.
-  ad4116.reset();
-  hardcoded_ad4116_setup();
+  // Configure AD4116.
+  setup_ad4116();
 
-  // Setup analog outputs as sample signals.
-  pinMode(A0, OUTPUT);
-  pinMode(A1, OUTPUT);
-  pinMode(A2, OUTPUT);
-  pinMode(A3, OUTPUT);
-  digitalWrite(A0, LOW);  // keep A0 as "GND" always.
   Serial.println("setup done.");
 }
 
