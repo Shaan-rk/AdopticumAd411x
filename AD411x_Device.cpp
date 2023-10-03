@@ -31,8 +31,9 @@ double code_to_volt_bipolar(int32_t code, double v_ref)
 	// in a code of 000 … 000, a zero differential input voltage resulting in
 	// a code of 100 … 000, and a positive full-scale input voltage
 	// resulting in a code of 111 … 111.
-	const double conv_factor = v_ref * 10.0 / (double)(0x00800000L); // = 1.1920928955e-7
-	auto volt = conv_factor * (code - 0x00800000L);
+	const int32_t full_scale_voltage = 0x00800000L;
+	const double conv_factor = v_ref * 10.0 / (double)full_scale_voltage; // = 1.1920928955e-7
+	auto volt = conv_factor * (code - full_scale_voltage);
 	return volt;
 }
 
@@ -43,7 +44,8 @@ double code_to_volt_unipolar(int32_t code, double v_ref)
 	// input voltage resulting in a code of 00 … 00, a midscale voltage
 	// resulting in a code of 100 … 000, and a full-scale input voltage
 	// resulting in a code of 111 … 111.
-	const double conv_factor = v_ref * 10.0 / (double)(0x00FFFFFFL);
+	const int32_t full_scale_voltage = 0x00FFFFFFL;
+	const double conv_factor = v_ref * 10.0 / (double)full_scale_voltage;
 	auto volt = conv_factor * code;
 	return volt;
 }
