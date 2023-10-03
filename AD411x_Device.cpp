@@ -191,7 +191,7 @@ void AD411x_Device::reset()
 // and do not modify the state of the instance.
 
 // Read data of arbitrary length from a register.
-bool AD411x_Device::read_register(byte reg, byte *data, byte data_len) const
+void AD411x_Device::read_register(byte reg, byte *data, byte data_len) const
 {
 	// Write the registry address to the comms register. Then read the data back.
 	// bit 7 !WEN Must be 0.
@@ -214,7 +214,6 @@ bool AD411x_Device::read_register(byte reg, byte *data, byte data_len) const
 		print_bytes(data, data_len);
 		Serial.println(".");
 	}
-	return true;
 }
 
 // Generic read operation for 16-bit registers.
@@ -236,7 +235,7 @@ uint16_t AD411x_Device::read_register_16bit(byte reg) const
 }
 
 // Write data of arbitrary length to a register.
-bool AD411x_Device::write_register(byte reg, byte *data, byte data_len) const
+void AD411x_Device::write_register(byte reg, byte *data, byte data_len) const
 {
 	// Write the registry address to the comms register. Then write the data to the register.
 	// bit 7 !WEN Must be 0.
@@ -261,19 +260,19 @@ bool AD411x_Device::write_register(byte reg, byte *data, byte data_len) const
 }
 
 // Write a 16-bit word to a register.
-bool AD411x_Device::write_register(byte reg, uint16_t data) const
+void AD411x_Device::write_register(byte reg, uint16_t data) const
 {
 	// Order the data MSB first in a buffer.
 	byte buf[2];
 	buf[1] = (byte)(data & 0xff);
 	buf[0] = (byte)((data >> 8) & 0xff);
-	return write_register(reg, buf, 2);
+	write_register(reg, buf, 2);
 }
 
 // Write a 8-bit word to a register.
-bool AD411x_Device::write_register(byte reg, byte data) const
+void AD411x_Device::write_register(byte reg, byte data) const
 {
-	return write_register(reg, &data, 1);
+	write_register(reg, &data, 1);
 }
 
 // ----------------------------------------------------------------------------
