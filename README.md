@@ -2,6 +2,17 @@
 AD411x Analog to Digital converter Arduino library.
 
 
+## Installation
+
+- Clone the Adopticum_AD411x repository from GitHub to your computer.
+- Put the "Adopticum_AD411x" folder inside the "libraries" folder.
+In your Arduino sketchbook folder is a subfolder called "libraries".
+- Install the dependency: Adafruit BusIO library from the library manager.
+- Restart the Arduino IDE.
+- Open an example from the main menu by selecting e.g.
+*File > Examples > Adopticum_AD411x > hello_ad4116*
+
+
 ## License
 
 This work is open source and licensed under the Boost Software License.

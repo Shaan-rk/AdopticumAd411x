@@ -1,6 +1,8 @@
 /*
-Adopticum_AD411x
-AD411x Analog to digital converter Arduino library
+AD411x_Device.h
+Abstract baseclass for AD411x devices (e.g. AD4111/4112/4113/4114/4115/4116).
+Implements functionality that is shared across the AD411x family.
+Part of Adopticum_AD411x Analog to digital converter Arduino library.
 
 Created by Greger Burman, Adopticum, 2023.
 
@@ -9,10 +11,10 @@ Distributed under the Boost Software License, Version 1.0.
 */
 
 #pragma once
-#include <Adafruit_SPIDevice.h>
+#include "AD411x.h"
 #include <Arduino.h>
 #include <SPI.h>
-#include "AD411x.h"
+#include <Adafruit_SPIDevice.h>
 
 // Abstract baseclass for AD411x devices e.g. AD4111/4112/4113/4114/4115/4116.
 // Implements functionality that is shared across the AD411x family.

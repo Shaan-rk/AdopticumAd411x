@@ -10,13 +10,12 @@ Distributed under the Boost Software License, Version 1.0.
 (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 */
 
-
-#include <Arduino.h>
-#include <Adafruit_SPIDevice.h>
-#include <SPI.h>
 #include "AD411x.h"
 #include "AD411x_Device.h"
 #include "AD411x_Helpers.h"
+#include <Arduino.h>
+#include <SPI.h>
+#include <Adafruit_SPIDevice.h>
 
 using namespace AD411x;
 using namespace AD411x::Helpers;

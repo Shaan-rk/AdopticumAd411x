@@ -10,8 +10,6 @@ Distributed under the Boost Software License, Version 1.0.
 */
 
 #pragma once
-
-#include <Arduino.h>
 #include "Adafruit_SPIDevice.h"
 
 // Definitions, types and constants that are shared across the AD411x family.

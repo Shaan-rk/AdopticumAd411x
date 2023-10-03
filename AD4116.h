@@ -10,7 +10,6 @@ Distributed under the Boost Software License, Version 1.0.
 */
 
 #pragma once
-#include <Arduino.h>
 #include "AD411x.h"
 #include "AD411x_Device.h"
 
