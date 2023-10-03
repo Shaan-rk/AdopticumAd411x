@@ -1,6 +1,18 @@
-#include <Adafruit_SPIDevice.h>
-#include "Adopticum_AD411x.h"
-#include "Adopticum_AD411x_Definitions.h"
+/*
+hello_ad4116.ino
+Example code for Adopticum_AD411x Analog to Digital converter Arduino library.
+
+This example connects to an AD4116 device connected to the Arduino's native SPI bus and
+prints a message to indicate if communication was successful.
+Every 10 seconds it reads some registers on the AD4116 and prints them to the serial port.
+
+Created by Greger Burman, Adopticum, 2023.
+
+Distributed under the Boost Software License, Version 1.0.
+(See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+*/
+
+#include <Adopticum_AD411x.h>
 
 namespace config {
   const char *Program = "hello_ad4116";
