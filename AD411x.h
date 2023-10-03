@@ -136,7 +136,8 @@ namespace AD411x
 		const uint16_t RESERVED = 0x0000;
 
 		// Default setup setting is (0x1000) bipolar, external reference, no buffers.
-		const uint16_t DEFAULT = Setup::BIPOLAR;
+		//TODO: DEFAULT unusable because of namespace pollution from macro "#define DEFAULT" in Arduino.h.
+		const uint16_t DEFAULT_SETUP = Setup::BIPOLAR;
 	};
 
 	// The filter configuration registers are 16-bit registers that configure
@@ -178,7 +179,8 @@ namespace AD411x
 
 		// Default setup setting is (0x0500).
 		// 20 SPS, 86 dB rejection, and 50 ms settling time for enhanced 50 Hz/60 Hz rejection.
-		const uint16_t DEFAULT = Filter::ENHFILT_20SPS;
+		//TODO: DEFAULT unusable because of namespace pollution from macro "#define DEFAULT" in Arduino.h.
+		const uint16_t DEFAULT_FILTER = Filter::ENHFILT_20SPS;
 	}
 
 	// ADC MODE REGISTER
@@ -239,7 +241,7 @@ namespace AD411x
 		// also enables the internal oscillator.
 		enum class Clock : uint16_t
 		{
-			INTERNAL = 0x0000,			   // 00 Internal oscillator.
+			INTERNAL_OSCILLATOR = 0x0000,			   // 00 Internal oscillator.
 			INTERNAL_WITH_OUTPUT = 0x0004, // 01 Internal oscillator output on the XTAL2/CLKIO pin.
 			EXTERNAL_INPUT = 0x0008,	   // 10 External clock input on the XTAL2/CLKIO pin.
 			EXTERNAL_CRYSTAL = 0x000C,	   // 11 External crystal on the XTAL1 pin and the XTAL2/CLKIO pin.
@@ -248,7 +250,8 @@ namespace AD411x
 		// bits 1..0 reserved. Set to 0!
 
 		// Default is 0x2000
-		const uint16_t DEFAULT = ADCMode::SING_CYC;
+		//TODO: DEFAULT unusable because of namespace pollution from macro "#define DEFAULT" in Arduino.h.
+		const uint16_t DEFAULT_ADCMODE = SING_CYC;
 	}
 
 
