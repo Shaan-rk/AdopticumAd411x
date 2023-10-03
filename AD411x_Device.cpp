@@ -155,18 +155,26 @@ bool AD411x_Device::begin()
 
 void AD411x_Device::reset()
 {
-	// After a power-up cycle and when the power supplies are
-	// stable, a device reset is required. In situations where interface
-	// synchronization is lost, a device reset is also required. A write
-	// operation of at least 64 serial clock cycles with DIN high returns
-	// the ADC to the default state by resetting the entire device,
-	// including the register contents. Alternatively, if CS is being used
-	// with the digital interface, returning CS high sets the digital
-	// interface to the default state and halts any serial interface operation.
-	// TODO: 64 cycles @ 4 Mhz = 16 us, hence bring CS high for 1 ms (60x longer) should be enough.
+	// After a power-up cycle and when the power supplies are stable, a device 
+	// reset is required. In situations where interface synchronization is lost,
+	// a device reset is also required. A write operation of at least 64 serial 
+	// clock cycles with DIN high returns the ADC to the default state by 
+	// resetting the entire device, including the register contents. 
+	// Alternatively, if CS is being used with the digital interface, returning 
+	// CS high sets the digital interface to the default state and halts any 
+	// serial interface operation.
+	
+	// Reset by a write operation with 64 bits of 1 (8 bytes of 0xFF)
+	byte data[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+	interrupt_skip = true;
+	spi_dev->write(data, 8);
+	interrupt_skip = false;
 
-	digitalWrite(this->cs_pin, HIGH); // spi_dev->setChipSelect(HIGH);
-	delay(1);
+	// Alternative reset by bringing CS high for long enough.
+	// 64 cycles @ 4 Mhz = 16 us, hence bring CS high for 1 ms (60x longer) should be enough.
+	//digitalWrite(this->cs_pin, HIGH); // spi_dev->setChipSelect(HIGH);
+	//delay(1);
+	
 	// Pull and keep CS low to use DOUT/RDY pin for interrupt when data is ready.
 	digitalWrite(this->cs_pin, LOW); // spi_dev->setChipSelect(LOW);
 	delay(100);
