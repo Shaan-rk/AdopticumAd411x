@@ -1,3 +1,34 @@
+/*
+broadcast_test.ino
+Example code to broadcast (empty) datagrams over UDP at a high transfer rate.
+
+This example does not use the AD4116 device at all. 
+Instead is it only meant to test the WiFi capabilities of the MCU.
+
+## Test results
+
+We can run this different MCUs with no (or minor) code changes.
+We have tested the code on the Arduino Uno R4 WiFi and the Raspberry Pi Pico W.
+This has revealed som problems with the Arduino Uno R4 i.e. ArduinoCore-renesas.
+
+### Performance problems
+
+The Pico W can push out > 300 datagrams per second onto the WiFi network.
+The Arduino Uno R4 WiFi can only push out about 9 datagrams per second.
+On the Arduino R4 very little CPU resources remain for other tasks.
+
+### SSID with space not working on Arduino Uno R4 WiFi
+
+We tested on a WiFi network with a name (SSID) like this: "My wifi".
+The Arduino Uno R4 WiFi cannot connect to an SSID with a space in the name.
+This is not a problem on the Pico W or on an ESP32.
+
+
+Created by Greger Burman, Adopticum, 2023.
+
+Distributed under the Boost Software License, Version 1.0.
+(See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+*/
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -122,6 +153,10 @@ uint32_t i = 0;
 
 void loop() 
 {
+	// Use a delay to simulate time consumed by other work
+	delay(2);
+
+	// Automatic reconnection to WiFi if disconnected.
 	// bool online = (WiFi.status() == WL_CONNECTED)
 	// 	|| wifi_connect(secrets::wifi_ssid, secrets::wifi_password);
 	// if (!online) {
@@ -135,11 +170,13 @@ void loop()
 	udp.write((uint8_t*)&datagram, sizeof(datagram));
 	udp.endPacket();
 
-	// Debug the time consumed.
-	if (datagram.datagram_id % 100 == 0) {
+	// Debug output about the time consumed.
+	if (datagram.datagram_id % 250 == 0) {
 		auto t1 = millis();
-		Serial.print("100 datagrams. 100 * 250 = 25 000 samples. Time consumed (ms): ");
+		Serial.print("250 datagrams. 250 * 250 = 62 500 samples. Time consumed (ms): ");
 		Serial.println(t1 - t0);
+		Serial.print("Sent datagrams per s: ");
+		Serial.println(250.0 * 1000 / (t1 - t0));
 		t0 = t1;
 	}
 }
