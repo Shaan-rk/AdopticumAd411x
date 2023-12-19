@@ -7,7 +7,7 @@ Instead is it only meant to test the WiFi capabilities of the MCU.
 
 ## Test results
 
-We can run this different MCUs with no (or minor) code changes.
+We can run this on different MCUs with no (or minor) code changes.
 We have tested the code on the Arduino Uno R4 WiFi and the Raspberry Pi Pico W.
 This has revealed som problems with the Arduino Uno R4 i.e. ArduinoCore-renesas.
 
