@@ -31,8 +31,9 @@ double code_to_volt_bipolar(int32_t code, double v_ref)
 	// in a code of 000 … 000, a zero differential input voltage resulting in
 	// a code of 100 … 000, and a positive full-scale input voltage
 	// resulting in a code of 111 … 111.
-	const double conv_factor = v_ref * 10.0 / (double)(0x00800000L); // = 1.1920928955e-7
-	auto volt = conv_factor * (code - 0x00800000L);
+	const int32_t full_scale_voltage = 0x00800000L;
+	const double conv_factor = v_ref * 10.0 / (double)full_scale_voltage; // = 1.1920928955e-7
+	auto volt = conv_factor * (code - full_scale_voltage);
 	return volt;
 }
 
@@ -43,7 +44,8 @@ double code_to_volt_unipolar(int32_t code, double v_ref)
 	// input voltage resulting in a code of 00 … 00, a midscale voltage
 	// resulting in a code of 100 … 000, and a full-scale input voltage
 	// resulting in a code of 111 … 111.
-	const double conv_factor = v_ref * 10.0 / (double)(0x00FFFFFFL);
+	const int32_t full_scale_voltage = 0x00FFFFFFL;
+	const double conv_factor = v_ref * 10.0 / (double)full_scale_voltage;
 	auto volt = conv_factor * code;
 	return volt;
 }
@@ -189,7 +191,7 @@ void AD411x_Device::reset()
 // and do not modify the state of the instance.
 
 // Read data of arbitrary length from a register.
-bool AD411x_Device::read_register(byte reg, byte *data, byte data_len) const
+void AD411x_Device::read_register(byte reg, byte *data, byte data_len) const
 {
 	// Write the registry address to the comms register. Then read the data back.
 	// bit 7 !WEN Must be 0.
@@ -212,7 +214,6 @@ bool AD411x_Device::read_register(byte reg, byte *data, byte data_len) const
 		print_bytes(data, data_len);
 		Serial.println(".");
 	}
-	return true;
 }
 
 // Generic read operation for 16-bit registers.
@@ -234,7 +235,7 @@ uint16_t AD411x_Device::read_register_16bit(byte reg) const
 }
 
 // Write data of arbitrary length to a register.
-bool AD411x_Device::write_register(byte reg, byte *data, byte data_len) const
+void AD411x_Device::write_register(byte reg, byte *data, byte data_len) const
 {
 	// Write the registry address to the comms register. Then write the data to the register.
 	// bit 7 !WEN Must be 0.
@@ -259,19 +260,19 @@ bool AD411x_Device::write_register(byte reg, byte *data, byte data_len) const
 }
 
 // Write a 16-bit word to a register.
-bool AD411x_Device::write_register(byte reg, uint16_t data) const
+void AD411x_Device::write_register(byte reg, uint16_t data) const
 {
 	// Order the data MSB first in a buffer.
 	byte buf[2];
 	buf[1] = (byte)(data & 0xff);
 	buf[0] = (byte)((data >> 8) & 0xff);
-	return write_register(reg, buf, 2);
+	write_register(reg, buf, 2);
 }
 
 // Write a 8-bit word to a register.
-bool AD411x_Device::write_register(byte reg, byte data) const
+void AD411x_Device::write_register(byte reg, byte data) const
 {
-	return write_register(reg, &data, 1);
+	write_register(reg, &data, 1);
 }
 
 // ----------------------------------------------------------------------------

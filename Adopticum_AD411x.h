@@ -16,4 +16,5 @@ Distributed under the Boost Software License, Version 1.0.
 #include "AD411x.h"
 #include "AD4116.h"
 #include "AD411x_Device.h"
+#include "AdaptiveMovingAverage.h"
 #include <Adafruit_SPIDevice.h>

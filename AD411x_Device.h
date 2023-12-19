@@ -53,14 +53,14 @@ public:
 
 	// --- Generic register read and write operations. --------------------------
 	// Read data of arbitrary length from a register.
-	bool read_register(byte reg, byte *data, byte data_len) const;
+	void read_register(byte reg, byte *data, byte data_len) const;
 	// Generic read operation for 16-bit registers.
 	uint16_t read_register_16bit(byte reg) const;
 
 	// Generic write operation for 16-bit registers.
-	bool write_register(byte reg, uint16_t data) const;
+	void write_register(byte reg, uint16_t data) const;
 	// Generic write operation for 8-bit registers.
-	bool write_register(byte reg, byte data) const;
+	void write_register(byte reg, byte data) const;
 	// --------------------------------------------------------------------------
 
 	// --- Specific register read and write operations. -------------------------
@@ -168,7 +168,7 @@ protected:
 	AD411x_Device();
 
 	// Write data of arbitrary length to a register.
-	bool write_register(byte reg, byte *data, byte data_len) const;
+	void write_register(byte reg, byte *data, byte data_len) const;
 
 	// We always want data_stat to be enabled. Don't let user disable it.
 	void set_data_stat(bool value);
