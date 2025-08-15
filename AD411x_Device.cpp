@@ -98,7 +98,7 @@ uint32_t AD411x_Device::get_read_lap() { return get_and_set_lap(read_count); }
 // Region with constructors and initialization --------------------------------
 
 // Define and initialize static variables.
-int8_t AD411x_Device::interrupt_pin = -1;
+int8_t AD411x_Device::interrupt_pin = 19;
 volatile bool interrupt_skip = false;
 
 // protected
@@ -167,9 +167,9 @@ void AD411x_Device::reset()
 	
 	// Reset by a write operation with 64 bits of 1 (8 bytes of 0xFF)
 	byte data[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-	interrupt_skip = true;
+	// interrupt_skip = true;
 	spi_dev->write(data, 8);
-	interrupt_skip = false;
+	// interrupt_skip = false;
 
 	// Alternative reset by bringing CS high for long enough.
 	// 64 cycles @ 4 Mhz = 16 us, hence bring CS high for 1 ms (60x longer) should be enough.
@@ -197,11 +197,12 @@ void AD411x_Device::read_register(byte reg, byte *data, byte data_len) const
 	// bit 7 !WEN Must be 0.
 	// bit 6 R/W Set to 1 to read the register.
 	// bits 5..0 Registry address.
-	byte addr = 0x3F & reg;
-	data[0] = 0x40 | addr;
-	interrupt_skip = true;
-	spi_dev->write_then_read(data, 1, data, data_len);
-	interrupt_skip = false;
+    byte addr = 0x3F & reg;
+    byte cmd = 0x40 | addr;  // Read command byte
+
+    // interrupt_skip = true;
+    spi_dev->write_then_read(&cmd, 1, data, data_len);
+    // interrupt_skip = false;
 
 	// Pull and hold CS pin low to get interrupt on DOUT/DRDY when data is ready.
 	digitalWrite(this->cs_pin, LOW);
@@ -214,6 +215,8 @@ void AD411x_Device::read_register(byte reg, byte *data, byte data_len) const
 		print_bytes(data, data_len);
 		Serial.println(".");
 	}
+	// Serial.printf("Reading register 0x%02X with length %d\n", reg, data_len);
+
 }
 
 // Generic read operation for 16-bit registers.
@@ -225,9 +228,9 @@ uint16_t AD411x_Device::read_register_16bit(byte reg) const
 	// bits 5..0 Registry address.
 	byte data[2];
 	byte addr = 0x40 | (0x3F & reg);
-	interrupt_skip = true;
+	// interrupt_skip = true;
 	spi_dev->write_then_read(&addr, 1, data, 2);
-	interrupt_skip = false;
+	// interrupt_skip = false;
 	// Pull and hold CS pin low to get interrupt on DOUT/DRDY when data is ready.
 	digitalWrite(this->cs_pin, LOW);
 	// Data as one 16 bit word, MSB first.
@@ -242,9 +245,9 @@ void AD411x_Device::write_register(byte reg, byte *data, byte data_len) const
 	// bit 6 R/W Set to 0 to write to the register.
 	// bits 5..0 Registry address.
 	byte addr = 0x3F & reg;
-	interrupt_skip = true;
+	// interrupt_skip = true;
 	spi_dev->write(data, data_len, &addr, 1);
-	interrupt_skip = false;
+	// interrupt_skip = false;
 
 	// Pull and hold CS pin low to get interrupt on DOUT/DRDY when data is ready.
 	digitalWrite(this->cs_pin, LOW);
@@ -299,26 +302,76 @@ void AD411x_Device::read_data()
 }
 
 void AD411x_Device::read_volt(byte *out_channel, double *out_volt)
-{ // The data register (0x04) contains the ADC conversion result (24 bits).
-	// This register contains the ADC conversion result. If DATA_STAT is set in the
-	// interface mode register, the status register is appended to this register when
-	// read, making this a 32-bit register.
-	byte buf[4];
-	byte len = this->data_stat ? 4 : 3;
-	read_register(0x04, buf, len);
+{
+    byte buf[4];
+    byte len = this->data_stat ? 4 : 3;
+    read_register(0x04, buf, len);
 
-	// The 4th byte tells us which channel the sample is from. Without status byte we will always assume 0.
-	*out_channel = len == 3 ? 0 : buf[3];
-	int32_t code = ((uint32_t)buf[0] << 16) | ((uint32_t)buf[1] << 8) | ((uint32_t)buf[2]);
+    if (out_channel) {
+        if (num_enabled == 1) {
+            *out_channel = channel_list[0];
+        } else {
+            byte adc_ch = (len == 4) ? buf[3] : 0xFF;
+            byte idx = 0xFF;
+            for (byte i = 0; i < num_enabled; i++) {
+                if (channel_list[i] == adc_ch) {
+                    idx = i;
+                    break;
+                }
+            }
+            *out_channel = (idx != 0xFF) ? channel_list[idx] : 0xFF;
+        }
+    }
 
-	// TODO: Must observe bipolar vs. unipolar configuration.
-	// Conversion to volt in bipolar configuration.
-	*out_volt = this->bipolar_factor * (code - 0x00800000);
-	// Conversion to volt in bipolar configuration.
-	// TODO: *out_volt = this->unipolar_factor * code;
+    int32_t code = ((uint32_t)buf[0] << 16) |
+                   ((uint32_t)buf[1] << 8) |
+                   ((uint32_t)buf[2]);
+    *out_volt = this->bipolar_factor * (code - 0x00800000);
 
-	clear_data_ready();
-	read_count[0]++;
+    clear_data_ready();
+    read_count[0]++;
+}
+
+void AD411x_Device::read_current(byte *out_channel, double *out_value)
+{
+    byte buf[4];
+    byte len = this->data_stat ? 4 : 3;
+    read_register(0x04, buf, len);
+
+    if (out_channel) {
+        if (num_enabled == 1) {
+            *out_channel = channel_list[0];
+        } else {
+            byte adc_ch = (len == 4) ? buf[3] : 0xFF;
+            byte idx = 0xFF;
+            for (byte i = 0; i < num_enabled; i++) {
+                if (channel_list[i] == adc_ch) {
+                    idx = i;
+                    break;
+                }
+            }
+            *out_channel = (idx != 0xFF) ? channel_list[idx] : 0xFF;
+        }
+    }
+
+    // Combine 3 bytes into 24-bit code
+    int32_t code = ((uint32_t)buf[0] << 16) |
+                   ((uint32_t)buf[1] << 8) |
+                   ((uint32_t)buf[2]);
+
+    // Convert offset binary → signed centered around 0
+    int32_t signed_code = code - 0x00800000;
+
+    // Convert to current using datasheet scaling
+    double LSB_current = this->v_ref / (50.0 * (double)(1 << 23)); // 50 Ω shunt
+    double current_A = (double)signed_code * LSB_current;
+
+    if (out_value) {
+        *out_value = current_A * 5.0;
+    }
+
+    clear_data_ready();
+    read_count[0]++;
 }
 
 void AD411x_Device::read_status()
@@ -369,6 +422,11 @@ void AD411x_Device::read_many_things()
 	read_register(0x07, buf, 2); // ID
 	Serial.print("ID register (0x");
 	print_bytes(buf, 2);
+	Serial.println(").");
+
+	read_register(0x10, buf, 3); // ID
+	Serial.print("Channel register (0x");
+	print_bytes(buf, 3);
 	Serial.println(").");
 }
 
@@ -492,19 +550,24 @@ void AD411x_Device::on_interrupt()
 #pragma region Channel configuration
 // Region with channel configuration ------------------------------------------
 
+// byte AD411x_Device::physical_to_logical_map[16] = {0xFF};
+
 void AD411x_Device::configure_channel(byte channel_number, uint16_t input, byte setup, bool enable)
 {
-	if (channel_number > 15)
-	{
-		return;
-	}
-	// CH_EN, bit 15.
-	uint16_t ch_en = enable ? 0x8000 : 0x0000;
-	// SETUP, bits 14..12.
-	uint16_t setup_sel = (setup & 0x7) << 12;
-	// INPUT, bits 9..0.
-	uint16_t ch_cfg = ch_en | setup_sel | input;
-	write_register(Register::CH0 + channel_number, ch_cfg);
+    if(channel_number > 15) return;
+
+    uint16_t ch_cfg = (enable ? 0x8000 : 0x0000) | ((setup & 0x7) << 12) | input;
+    write_register(Register::CH0 + channel_number, ch_cfg);
+
+    enabled_channels[channel_number] = enable;
+
+    // Rebuild channel list
+    num_enabled = 0;
+    for(byte i=0; i<16; i++){
+        if(enabled_channels[i]){
+            channel_list[num_enabled++] = i;
+        }
+    }
 }
 
 bool AD411x_Device::is_channel_enabled(byte channel_number)
@@ -537,6 +600,11 @@ void AD411x_Device::disable_channel(byte channel_number)
 	auto ch_reg = read_register_16bit(Register::CH0 + channel_number);
 	ch_reg &= 0x7FFF; // Clear bit 15.
 	write_register(Register::CH0 + channel_number, ch_reg);
+	if (this->DEBUG) 
+	{
+		Serial.print("Disabled channel ");
+		Serial.println(channel_number);
+	}
 }
 
 // ----------------------------------------------------------------------------

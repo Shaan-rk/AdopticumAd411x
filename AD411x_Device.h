@@ -65,6 +65,7 @@ public:
 
 	// --- Specific register read and write operations. -------------------------
 	void read_volt(byte *out_channel, double *out_volt);
+	void read_current(byte *out_channel, double *out_current);
 	void read_data();
 	void read_status();
 	void read_many_things();
@@ -88,11 +89,16 @@ public:
 	bool is_channel_enabled(byte channel);
 	void enable_channel(byte channel);
 	void disable_channel(byte channel);
+	byte num_enabled = 0;
+	bool enabled_channels[16] = {false};    // true if channel is enabled
+    byte channel_list[16];                  // stores enabled channels in order
+
 
 protected:
 	// Generic impl to configure channels.
 	// Derived classes implement specific strongly typed versions.
 	void configure_channel(byte channel, uint16_t input, byte setup, bool enable = true);
+
 	// --------------------------------------------------------------------------
 
 	// --- Setup configuration. Setup 0 to 7. -----------------------------------
@@ -117,6 +123,9 @@ public:
 	
 	// Read the filter settings for one of the 8 setups.
 	uint16_t read_filter_register(byte setup_number);
+
+	void set_data_stat(bool value);
+	void write_register(byte reg, byte *data, byte data_len) const;
 
 	// --------------------------------------------------------------------------
 #pragma endregion
@@ -168,8 +177,8 @@ protected:
 	AD411x_Device();
 
 	// Write data of arbitrary length to a register.
-	void write_register(byte reg, byte *data, byte data_len) const;
+	// void write_register(byte reg, byte *data, byte data_len) const;
 
 	// We always want data_stat to be enabled. Don't let user disable it.
-	void set_data_stat(bool value);
+	// void set_data_stat(bool value);
 };

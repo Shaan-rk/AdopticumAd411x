@@ -31,10 +31,10 @@ void AD4116_Device::configure_channel(byte channel_number, AD4116::Input input, 
 
 bool AD4116_Device::check_id()
 { // The ID register returns a 16-bit ID. For the AD4116, this value is 0x34Dx. (x=undefined)
-	byte buf[4];
-	read_register(0x07, buf, 2);
-	bool is_ad4116 = (0x34 == buf[0]) && (0xd0 == (0xf0 & buf[1]));
-	if (this->DEBUG) {
+	byte buf[2];
+	read_register_16bit(0x07);
+	bool is_ad4116 = (0x30 == buf[0]) && (0xd0 == (0xf0 & buf[1]));
+
 		if (is_ad4116) {
 			Serial.println("ADC product id matches AD4116.");
 		} else {
@@ -42,6 +42,5 @@ bool AD4116_Device::check_id()
 			print_bytes(buf, 2);
 			Serial.println(").");
 		}
-	}
 	return is_ad4116;
 }

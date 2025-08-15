@@ -38,20 +38,27 @@ namespace AD4116
 		VIN6_VINCOM = 0b0011010000,	 // VIN6 and VINCOM.
 		VIN7_VIN6 = 0b0011100110,	 // VIN7 and VIN6.
 		VIN7_VINCOM = 0b0011110000,	 // VIN7 and VINCOM.
-		VIN8_VIN9 = 0b0100001001,	 // VIN8 and VIN9.
-		VIN8_VINCOM = 0b0100010000,	 // VIN8 and VINCOM.
-		VIN9_VIN8 = 0b0100101000,	 // VIN9 and VIN8.
-		VIN9_VINCOM = 0b0100110000,	 // VIN9 and VINCOM.
-		VIN10_VINCOM = 0b0101010000, // VIN10, VINCOM (single-ended or differential pair)
+		
+		// VIN8_VIN9 = 0b0100001001,	 // VIN8 and VIN9.
+		// VIN8_VINCOM = 0b0100010000,	 // VIN8 and VINCOM.
+		// VIN9_VIN8 = 0b0100101000,	 // VIN9 and VIN8.
+		// VIN9_VINCOM = 0b0100110000,	 // VIN9 and VINCOM.
+		// VIN10_VINCOM = 0b0101010000, // VIN10, VINCOM (single-ended or differential pair)
 
-		ADCIN11_ADCIN12 = 0b0101101100, // ADCIN11, ADCIN12.
-		ADCIN12_ADCIN11 = 0b0110001011, // ADCIN12, ADCIN11.
-		ADCIN13_ADCIN14 = 0b0110101110, // ADCIN13, ADCIN14.
-		ADCIN14_ADCIN13 = 0b0111001101, // ADCIN14, ADCIN13.
-		ADCIN11_ADCIN15 = 0b0101101111, // ADCIN11, ADCIN15. (pseudo differential or differential pair)
-		ADCIN12_ADCIN15 = 0b0110001111, // ADCIN12, ADCIN15. (pseudo differential or differential pair)
-		ADCIN13_ADCIN15 = 0b0110101111, // ADCIN13, ADCIN15. (pseudo differential or differential pair)
-		ADCIN14_ADCIN15 = 0b0111001111, // ADCIN14, ADCIN15. (pseudo differential or differential pair)
+		// ADCIN11_ADCIN12 = 0b0101101100, // ADCIN11, ADCIN12.
+		// ADCIN12_ADCIN11 = 0b0110001011, // ADCIN12, ADCIN11.
+		// ADCIN13_ADCIN14 = 0b0110101110, // ADCIN13, ADCIN14.
+		// ADCIN14_ADCIN13 = 0b0111001101, // ADCIN14, ADCIN13.
+		// ADCIN11_ADCIN15 = 0b0101101111, // ADCIN11, ADCIN15. (pseudo differential or differential pair)
+		// ADCIN12_ADCIN15 = 0b0110001111, // ADCIN12, ADCIN15. (pseudo differential or differential pair)
+		// ADCIN13_ADCIN15 = 0b0110101111, // ADCIN13, ADCIN15. (pseudo differential or differential pair)
+		// ADCIN14_ADCIN15 = 0b0111001111, // ADCIN14, ADCIN15. (pseudo differential or differential pair)
+
+		IN0P_IN0N = 0b0111101000, // IN0+, IN0-.
+		IN1P_IN1N = 0b0111001001, // IN1+, IN1-. 
+		IN2P_IN2N = 0b0110101010, // IN2+, IN2-.
+		IN3P_IN3N = 0b0110001011, // IN3+, IN3-.
+		
 		Temperature = 0b1000110010,		// Temperature sensor.
 		Reference = 0b1010110110		// Reference.
 	};
