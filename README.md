@@ -10,7 +10,7 @@ In your Arduino sketchbook folder is a subfolder called "libraries".
 - Install the dependency: Adafruit BusIO library from the library manager.
 - Restart the Arduino IDE.
 - Open an example from the main menu by selecting e.g.
-*File > Examples > Adopticum_AD411x > hello_ad4111*
+*File > Examples > Adopticum_AD411x > hello_ad4116*
 
 
 ## License
