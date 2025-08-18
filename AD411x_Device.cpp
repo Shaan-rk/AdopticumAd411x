@@ -367,7 +367,7 @@ void AD411x_Device::read_current(byte *out_channel, double *out_value)
     double current_A = (double)signed_code * LSB_current;
 
     if (out_value) {
-        *out_value = current_A * 5.0;
+        *out_value = current_A;
     }
 
     clear_data_ready();
