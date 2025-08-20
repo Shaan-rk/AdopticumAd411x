@@ -18,9 +18,3 @@ Distributed under the Boost Software License, Version 1.0.
 #include "AD411x_Device.h"
 #include "AdaptiveMovingAverage.h"
 #include <Adafruit_SPIDevice.h>
-
-// Fault bit definitions
-#define AMPFAULT_NONE   0x00
-#define AMPFAULT_OVUV   0x01  // Over/Under voltage (voltage channels)
-#define AMPFAULT_RANGE  0x02  // Out-of-range (voltage channels)
-#define AMPFAULT_OPEN   0x04  // Open-circuit (current channels)
